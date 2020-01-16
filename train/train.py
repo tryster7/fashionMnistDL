@@ -48,15 +48,15 @@ def train(bucket_name, epochs=10, batch_size=128 ):
 
     cnn.fit(trainX, trainy, epochs=epochs, batch_size=batch_size)
     
-    predictions = model.predict(testX)
+    predictions = cnn.predict(testX)
     
     pred = np.argmax(predictions, axis=1)
     
-    #df = pd.DataFrame({'target': testy, 'predicted': pred}, columns=['target', 'predicted'])
+    df = pd.DataFrame({'target': testy, 'predicted': pred}, columns=['target', 'predicted'])
 
-    #df = df.applymap(np.int64)
+    df = df.applymap(np.int64)
     
-    test_loss, test_acc = model.evaluate(testX,  testy, verbose=2)
+    test_loss, test_acc = cnn.evaluate(testX,  testy, verbose=2)
 
     print("\n Test Accuracy is {} ".format(test_acc))
 
@@ -82,7 +82,6 @@ def train(bucket_name, epochs=10, batch_size=128 ):
 
     df_cm = pd.DataFrame(data, columns=['target', 'predicted', 'count'])
 
-    #df_cm = df.groupby(['target', 'predicted']).size().reset_index(name='count')
     cm_file = bucket_name + '/metadata/cm.csv'
 
     with file_io.FileIO(cm_file, 'w') as f:
