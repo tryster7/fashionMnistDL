@@ -25,11 +25,11 @@ def parse_arguments():
                       help='The bucket where the output has to be stored')
   parser.add_argument('--epochs',
                       type=int,
-                      default=5,
+                      default=r1,
                       help='Number of epochs for training the model')
   parser.add_argument('--batch_size',
                       type=int,
-                      default=128,
+                      default=64,
                       help='the batch size for each epoch')
 
   args = parser.parse_known_args()[0]
