@@ -42,7 +42,7 @@ def mnist_pipeline(gs_bucket='gs://your-bucket/export',
   ]
   train = dsl.ContainerOp(
       name='train',
-      image='gcr.io/kb-poc-262417/mnist:latest',
+      image='gcr.io/kb-poc-262417/mnist/train:latest',
       arguments= train_args
   )
 
@@ -54,7 +54,7 @@ def mnist_pipeline(gs_bucket='gs://your-bucket/export',
 
   serve = dsl.ContainerOp(
       name='serve',
-      image='gcr.io/google-samples/ml-pipeline-kubeflow-tfserve:v2',
+      image='gcr.io/kb-poc-262417/mnist/deployer:latest',
       arguments=serve_args
   )
 
