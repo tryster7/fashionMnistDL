@@ -30,15 +30,15 @@ platform = 'GCP'
 )
 def mnist_pipeline(gs_bucket='gs://your-bucket/export', 
 		   epochs=10, 
-		   batch-size=128,
+		   batch_size=128,
 		   model_dir='gs://your-bucket/export', 
-		   model_name=dummy,
-		   server_name=dummy):
+		   model_name='dummy',
+		   server_name='dummy'):
 		   
   train_args = [
-  		'bucket_name' = gs_bucket, 
-  		'epochs' = epochs, 
-  		'batch_size' = batch-size
+  		'--bucket_name', gs_bucket, 
+  		'--epochs', epochs, 
+  		'--batch_size', batch_size
   ]
   train = dsl.ContainerOp(
       name='train',
