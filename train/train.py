@@ -6,6 +6,7 @@ import sys
 import json
 import pandas as pd
 import os
+import argparse
 
 from sklearn.metrics import confusion_matrix
 
@@ -15,6 +16,24 @@ from keras.datasets import fashion_mnist
 
 # Helper libraries
 import numpy as np
+
+def parse_arguments():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--bucket_name',
+                      type=str,
+                      default='gs://',
+                      help='The bucket where the output has to be stored')
+  parser.add_argument('--epochs',
+                      type=int,
+                      default=5,
+                      help='Number of epochs for training the model')
+  parser.add_argument('--batch_size',
+                      type=int,
+                      default=128,
+                      help='the batch size for each epoch')
+
+  args = parser.parse_known_args()[0]
+  return args
 
 def train(bucket_name, epochs=10, batch_size=128 ):
 
@@ -116,11 +135,12 @@ def train(bucket_name, epochs=10, batch_size=128 ):
 
 
 if __name__ == '__main__':
+    print("The arguments are ", str(sys.argv))
     if len(sys.argv) < 1:
        print("Usage: train bucket-name epochs batch-size")
        sys.exit(-1)
-    bucket_name = sys.argv[1]
-    epochs = int(sys.argv[2])
-    batch_size = int(sys.argv[3])
-    train(bucket_name, epochs)
+
+    args = parse_arguments()
+    print(args)
+    train(args.bucket_name, int(args.epochs), int(args.batch_size))
 
