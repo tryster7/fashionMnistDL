@@ -1,0 +1,7 @@
+pandas
+tensorflow
+keras
+google-cloud
+google-cloud-storage
+sklearn
+gcsfs
