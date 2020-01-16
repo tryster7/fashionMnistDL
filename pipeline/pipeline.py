@@ -57,7 +57,6 @@ def mnist_pipeline(gs_bucket='gs://your-bucket/export',
       image='gcr.io/google-samples/ml-pipeline-kubeflow-tfserve:v2',
       arguments=serve_args
   )
-  serve.after(train)
 
   steps = [train, serve]
   for step in steps:
@@ -65,6 +64,8 @@ def mnist_pipeline(gs_bucket='gs://your-bucket/export',
       step.apply(gcp.use_gcp_secret('user-gcp-sa'))
     else:
       step.apply(onprem.mount_pvc(pvc_name, 'local-storage', '/mnt'))
+
+  serve.after(train)
 
 if __name__ == '__main__':
   import kfp.compiler as compiler
