@@ -12,5 +12,5 @@ steps:
   - 'gcr.io/$PROJECT_ID/mnist/katib/train:latest'
   - '--cache-from'
   - 'gcr.io/$PROJECT_ID/mnist/katib/train:latest'
-  - 'train/'
+  - 'katib/'
 images: ['gcr.io/$PROJECT_ID/mnist/katib/train:latest']
