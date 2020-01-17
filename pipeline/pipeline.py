@@ -54,7 +54,7 @@ def mnist_pipeline(gs_bucket='gs://your-bucket/export',
 
   serve = dsl.ContainerOp(
       name='serve',
-      image='gcr.io/kb-poc-262417/mnist/deployer:latest',
+      image='gcr.io/kb-poc-262417/mnist/pipeline/deployer:latest',
       arguments=serve_args
   )
 
