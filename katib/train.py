@@ -62,6 +62,7 @@ def train(epochs=10, batch_size=128 ):
     
     test_loss, test_acc = cnn.evaluate(testX,  testy, verbose=2)
     print("Validation-accuracy={:.2f}".format(test_acc))
+    print("test-loss={:.2f}".format(test_loss))
 
 if __name__ == '__main__':
     print("The arguments are ", str(sys.argv))
