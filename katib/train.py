@@ -7,28 +7,48 @@ import json
 import os
 import argparse
 
-from keras.datasets import fashion_mnist
+from tensorflow.python.platform import gfile
 
+from keras.datasets import fashion_mnist
 
 # Helper libraries
 import numpy as np
 
+ARGS = None
+
 def parse_arguments():
-  parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
 
-  parser.add_argument('--epochs',
-                      type=int,
-                      default=5,
-                      help='Number of epochs for training the model')
-  parser.add_argument('--batch_size',
-                      type=int,
-                      default=64,
-                      help='the batch size for each epoch')
+    parser.add_argument('--epochs',
+        type=int,
+        default=5,
+        help='Number of epochs for training the model')
+    parser.add_argument('--batch_size',
+        type=int,
+        default=64,
+        help='the batch size for each epoch')
+    parser.add_argument('--learning_rate',
+        type=float,
+        default=0.001,
+        help='the batch size for each epoch')
 
-  args = parser.parse_known_args()[0]
-  return args
+    parser.add_argument('--log_dir',
+        type=str,
+        default='/tmp/logs',
+        help='Summaries log directory')
 
-def train(epochs=10, batch_size=128 ):
+    return parser
+
+def train():
+
+
+    print(ARGS.log_dir)
+    if gfile.Exists(ARGS.log_dir):
+        gfile.DeleteRecursively(ARGS.log_dir)
+    gfile.MakeDirs(ARGS.log_dir)
+
+    log_file = ARGS.log_dir + '/train'
+    print("The log file is ", log_file)
 
     # load dataset
     (trainX, trainy), (testX, testy) = fashion_mnist.load_data()
@@ -44,6 +64,7 @@ def train(epochs=10, batch_size=128 ):
     cnn = tf.keras.models.Sequential()
 
     cnn.add(tf.keras.layers.Conv2D(32, (3,3), activation='relu', input_shape = (28, 28, 1)))
+
     cnn.add(tf.keras.layers.MaxPooling2D(2,2))
 
     cnn.add(tf.keras.layers.Conv2D(64, (3,3), activation='relu'))
@@ -56,16 +77,33 @@ def train(epochs=10, batch_size=128 ):
 
     cnn.summary()
 
-    cnn.compile(optimizer=tf.optimizers.Adam(), loss = 'sparse_categorical_crossentropy', metrics =['accuracy'])
+    print(ARGS)
 
-    cnn.fit(trainX, trainy, epochs=epochs, batch_size=batch_size)
+    optimizer = tf.keras.optimizers.SGD(learning_rate = ARGS.learning_rate)
+    
+    cnn.compile(optimizer=optimizer, loss = 'sparse_categorical_crossentropy', metrics =['accuracy'])
+
+    cnn.fit(trainX, trainy, epochs=ARGS.epochs, batch_size=ARGS.batch_size)
     
     test_loss, test_acc = cnn.evaluate(testX,  testy, verbose=2)
+
+    writer = tf.summary.create_file_writer(log_file)
+
+    with writer.as_default():
+        tf.summary.scalar('accuracy', test_acc, step=1)
+        writer.flush()
+
+
+
+    print("accuracy=", test_acc)
+
 
 
 if __name__ == '__main__':
     print("The arguments are ", str(sys.argv))
-    args = parse_arguments()
-    print(args)
-    train(int(args.epochs), int(args.batch_size))
+    parser = parse_arguments()
+    ARGS, unknown_args = parser.parse_known_args()
+    print(ARGS)
+    print("Unknown arguments are ", unknown_args)
+    train()
 
