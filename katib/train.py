@@ -97,7 +97,7 @@ def train():
 
     print("accuracy=", test_acc)
 
-
+    print("Validation-accuracy=",test_acc)
 
 if __name__ == '__main__':
     print("The arguments are ", str(sys.argv))
