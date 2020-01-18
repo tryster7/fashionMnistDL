@@ -19,6 +19,16 @@ ARGS = None
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('--momentum',
+        type=float,
+        default='SGD',
+        help='Number of epochs for training the model')
+
+    parser.add_argument('--optimizer_name',
+        type=str,
+        default='SGD',
+        help='Number of epochs for training the model')
+
     parser.add_argument('--epochs',
         type=int,
         default=5,
@@ -75,13 +85,19 @@ def train():
 
     cnn.add(tf.keras.layers.Dense(10, activation = 'softmax'))
 
-    cnn.summary()
-
     print(ARGS)
 
-    optimizer = tf.keras.optimizers.SGD(learning_rate = ARGS.learning_rate)
+    optimizer = tf.keras.optimizers.get(ARGS.optimizer_name)
+
+    optimizer.learning_rate =ARGS.learning_rate
+
+    optimizer.momentum =ARGS.momentum
+
+    print(optimizer)
     
     cnn.compile(optimizer=optimizer, loss = 'sparse_categorical_crossentropy', metrics =['accuracy'])
+
+    cnn.summary()
 
     cnn.fit(trainX, trainy, epochs=ARGS.epochs, batch_size=ARGS.batch_size)
     
