@@ -68,7 +68,9 @@ def train():
     trainX = trainX / 255
 
     testX = testX / 255
+
     trainX = trainX.reshape(trainX.shape[0], 28, 28, 1)
+
     testX = testX.reshape(testX.shape[0], 28, 28, 1)
 
     cnn = tf.keras.models.Sequential()
