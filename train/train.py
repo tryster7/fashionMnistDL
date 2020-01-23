@@ -13,9 +13,16 @@ from sklearn.metrics import confusion_matrix
 from google.cloud import storage
 from keras.datasets import fashion_mnist
 
+from kubeflow.metadata import metadata
+from datetime import datetime
+from uuid import uuid4
 
 # Helper libraries
 import numpy as np
+
+
+METADATA_STORE_HOST = "metadata-grpc-service.kubeflow" # default DNS of Kubeflow Metadata gRPC serivce.
+METADATA_STORE_PORT = 8080
 
 def parse_arguments():
   parser = argparse.ArgumentParser()
@@ -36,6 +43,27 @@ def parse_arguments():
   return args
 
 def train(bucket_name, epochs=10, batch_size=128 ):
+
+    #Create Metadata Workspace and a Exec to log details
+    mnist_train_workspace = metadata.Workspace(
+    # Connect to metadata service in namespace kubeflow in k8s cluster.
+    store=metadata.Store(grpc_host=METADATA_STORE_HOST, grpc_port=METADATA_STORE_PORT),
+    name="mnist train workspace",
+    description="a workspace for training mnist",
+    labels={"n1": "v1"})
+
+    run1 = metadata.Run(
+    workspace=mnist_train_workspace,
+    name="run-" + datetime.utcnow().isoformat("T") ,
+    description="a run in ws_1")
+
+    exec = metadata.Execution(
+    name = "execution" + datetime.utcnow().isoformat("T") ,
+    workspace=mnist_train_workspace,
+    run=run1,
+    description="execution example")
+
+    print("An execution was created with id %s" % exec.id)
 
     # load dataset
     (trainX, trainy), (testX, testy) = fashion_mnist.load_data()
@@ -74,10 +102,50 @@ def train(bucket_name, epochs=10, batch_size=128 ):
     df = pd.DataFrame({'target': testy, 'predicted': pred}, columns=['target', 'predicted'])
 
     df = df.applymap(np.int64)
-    
+
+    #Save model;
+    model_version = "model_version_" + str(uuid4())
+    model = exec.log_output(
+        metadata.Model(
+                name="MNIST",
+                description="model to recognize images",
+                owner="demo@kubeflow.org",
+                uri="gcs://a-kb-poc-262417/mnist/export/model",
+                model_type="CNN",
+                training_framework={
+                    "name": "tensorflow",
+                    "version": "v2.0"
+                },
+                hyperparameters={
+                    "learning_rate": 0.5,
+                    "layers": [28, 28, 1],
+                    "epochs": epochs,
+                    "batch-size": batch_size,
+                    "early_stop": True
+                },
+                version=model_version,
+                labels={"tag": "train"}))
+    print(model)
+    print("\nModel id is {0.id} and version is {0.version}".format(model))
+
     test_loss, test_acc = cnn.evaluate(testX,  testy, verbose=2)
 
     print("\n Test Accuracy is {} ".format(test_acc))
+    print("\n Test Loss is {} ".format(test_loss))
+    #Save evaluation
+    metrics = exec.log_output(
+    metadata.Metrics(
+            name="MNIST-evaluation",
+            description="validating the MNIST model to recognize images",
+            owner="demo@kubeflow.org",
+            uri="gcs://a-kb-poc-262417/mnist/metadata/mnist-metric.csv",
+            model_id=str(model.id),
+            metrics_type=metadata.Metrics.VALIDATION,
+            values={"accuracy": test_acc,
+                    "test_loss": test_loss},
+            labels={"mylabel": "l1"}))
+
+    print("Metrics id is %s" % metrics.id)
 
     export_path = bucket_name + '/export/model/1' 
 
