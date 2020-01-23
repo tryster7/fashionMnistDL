@@ -9,4 +9,4 @@ steps:
 artifacts:
   objects:
     location: 'gs://a-kb-poc-262417/mnist/pipeline/'
-    paths: ['pipeline.tar.gz','pipeline/pipeline.tar.gz' ]
+    paths: ['pipeline/pipeline.py.tar.gz']
