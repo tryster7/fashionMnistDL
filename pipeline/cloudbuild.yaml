@@ -6,6 +6,7 @@ steps:
   args:
   - '-c'
   - 'pip install -r pipeline/requirements.txt --upgrade && python pipeline/pipeline.py'
+  - 'ls -lrt'
 artifacts:
   objects:
     location: 'gs://a-kb-poc-262417/mnist/pipeline/'
