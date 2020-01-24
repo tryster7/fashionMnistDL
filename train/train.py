@@ -121,8 +121,8 @@ def train(bucket_name, epochs=10, batch_size=128 ):
                 hyperparameters={
                     "learning_rate": 0.5,
                     "layers": [28, 28, 1],
-                    "epochs": epochs,
-                    "batch-size": batch_size,
+                    "epochs": str(epochs),
+                    "batch-size": str(batch_size),
                     "early_stop": True
                 },
                 version=model_version,
@@ -143,8 +143,8 @@ def train(bucket_name, epochs=10, batch_size=128 ):
             uri="gs://a-kb-poc-262417/mnist/metadata/mnist-metric.csv",
             model_id=str(model.id),
             metrics_type=metadata.Metrics.VALIDATION,
-            values={"accuracy": test_acc,
-                    "test_loss": test_loss},
+            values={"accuracy": str(test_acc),
+                    "test_loss": str(test_loss)},
             labels={"mylabel": "l1"}))
 
     print("Metrics id is %s" % metrics.id)
