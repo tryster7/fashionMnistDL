@@ -5,4 +5,8 @@ steps:
   entrypoint: /bin/sh
   args:
   - '-c'
-  - 'pip install -r requirements.txt --upgrade && python pipeline.py'
+  - 'pip install -r pipeline/requirements.txt --upgrade && python pipeline/pipeline.py && ls pipeline/'
+artifacts:
+  objects:
+    location: 'gs://a-kb-poc-262417/mnist/pipeline/'
+    paths: ['pipeline/pipeline.py.tar.gz']
