@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python.lib.io import file_io
 import pathlib
+
 import sys
 import json
 import pandas as pd
@@ -44,6 +45,7 @@ def parse_arguments():
 
 def train(bucket_name, epochs=10, batch_size=128 ):
 
+    global metadata
     #Create Metadata Workspace and a Exec to log details
     mnist_train_workspace = metadata.Workspace(
     # Connect to metadata service in namespace kubeflow in k8s cluster.
@@ -110,7 +112,7 @@ def train(bucket_name, epochs=10, batch_size=128 ):
                 name="MNIST",
                 description="model to recognize images",
                 owner="demo@kubeflow.org",
-                uri="gcs://a-kb-poc-262417/mnist/export/model",
+                uri="gs://a-kb-poc-262417/mnist/export/model",
                 model_type="CNN",
                 training_framework={
                     "name": "tensorflow",
@@ -138,7 +140,7 @@ def train(bucket_name, epochs=10, batch_size=128 ):
             name="MNIST-evaluation",
             description="validating the MNIST model to recognize images",
             owner="demo@kubeflow.org",
-            uri="gcs://a-kb-poc-262417/mnist/metadata/mnist-metric.csv",
+            uri="gs://a-kb-poc-262417/mnist/metadata/mnist-metric.csv",
             model_id=str(model.id),
             metrics_type=metadata.Metrics.VALIDATION,
             values={"accuracy": test_acc,
@@ -198,8 +200,6 @@ def train(bucket_name, epochs=10, batch_size=128 ):
 
     with file_io.FileIO('/mlpipeline-ui-metadata.json', 'w') as f:
         json.dump(metadata, f)
-
-
 
 
 if __name__ == '__main__':
