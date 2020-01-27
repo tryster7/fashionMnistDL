@@ -17,7 +17,7 @@ steps:
   - '-m'
   - 'unittest discover'
   - '-s'
-  - 'test/
+  - 'test/'
   waitFor:
   - INSTALL
 - name: 'gcr.io/cloud-builders/docker'
