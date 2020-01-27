@@ -3,7 +3,7 @@ import unittest
 import tensorflow as tf
 from keras.datasets import fashion_mnist
 import numpy as np
-from fashionMnistDL.train import train
+from train import train
 
 
 class MyTestCase(unittest.TestCase):
