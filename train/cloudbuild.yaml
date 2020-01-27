@@ -15,9 +15,9 @@ steps:
   id: RUN-UNIT-TESTS
   args:
   - '-m'
-  - 'unittest discover'
+  - 'nose2'
   - '-s'
-  - 'test/'
+  - 'test'
   waitFor:
   - INSTALL
 - name: 'gcr.io/cloud-builders/docker'
