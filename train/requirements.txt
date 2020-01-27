@@ -6,4 +6,4 @@ google-cloud-storage
 sklearn
 gcsfs
 kubeflow-metadata
-unittest
+nose2
