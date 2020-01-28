@@ -76,8 +76,8 @@ def train(bucket_name, epochs=10, batch_size=128):
 
     create_kf_visualization(bucket_name, df, test_acc)
 
-    
- def create_tfmodel(optimizer, loss, metrics):
+
+def create_tfmodel(optimizer, loss, metrics):
     cnn = tf.keras.models.Sequential()
     cnn.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
     cnn.add(tf.keras.layers.MaxPooling2D(2, 2))
