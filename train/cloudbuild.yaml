@@ -12,7 +12,7 @@ steps:
   - 'train/requirements.txt'
 - name: python:3.7
   entrypoint: 'bash'
-  id: RUN-UNIT-TESTS
+  id: RUN-UNIT-TESTS-AND-COVERAGE
   args:
   - '-c'
   - |
@@ -26,7 +26,7 @@ steps:
   - |
     docker pull gcr.io/$PROJECT_ID/mnist/train:latest || exit 0
   waitFor:
-  - RUN-UNIT-TESTS-AND-COVERAGE
+  - INSTALL
 - name: 'gcr.io/cloud-builders/docker'
   args: 
   - 'build'
