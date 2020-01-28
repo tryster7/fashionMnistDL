@@ -7,3 +7,4 @@ sklearn
 gcsfs
 kubeflow-metadata
 nose2
+coverage
