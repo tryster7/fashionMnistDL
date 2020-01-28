@@ -67,14 +67,17 @@ def train(bucket_name, epochs=10, batch_size=128):
 
     save_metric_metadata(exec, model, test_acc, test_loss)
 
-    export_path = bucket_name + '/export/model/1'
-
-    tf.saved_model.save(cnn, export_dir=export_path)
+    save_tfmodel_in_gcs(bucket_name, cnn)
 
     df = pd.DataFrame({'target': testy, 'predicted': pred}, columns=['target', 'predicted'])
     df = df.applymap(np.int64)
 
     create_kf_visualization(bucket_name, df, test_acc)
+
+
+def save_tfmodel_in_gcs(bucket_name, model):
+    export_path = bucket_name + '/export/model/1'
+    tf.saved_model.save(model, export_dir=export_path)
 
 
 def create_tfmodel(optimizer, loss, metrics):
@@ -207,6 +210,7 @@ def load_and_normalize_data():
     testX = testX / 255
     trainX = trainX.reshape(trainX.shape[0], 28, 28, 1)
     testX = testX.reshape(testX.shape[0], 28, 28, 1)
+
     return testX, testy, trainX, trainy
 
 
