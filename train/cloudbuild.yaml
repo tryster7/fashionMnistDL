@@ -13,15 +13,13 @@ steps:
 - name: python:3.7
   entrypoint: python3
   id: RUN-UNIT-TESTS
-  args:
-  - ['coverage', 'run',  '--source=train' , '-m' , 'nose2' , '-v', '-s' , 'test']
+  args: ['coverage', 'run',  '--source=train' , '-m' , 'nose2' , '-v', '-s' , 'test']
   waitFor:
   - INSTALL
 - name: python:3.7
   entrypoint: python3
   id: RUN-COVERAGE
-  args:
-  - ['coverage' , 'report' , 'train/train.py']
+  args: ['coverage' , 'report' , 'train/train.py']
   waitFor:
   - RUN-UNIT-TESTS
 - name: 'gcr.io/cloud-builders/docker'
