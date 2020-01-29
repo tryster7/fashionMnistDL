@@ -1,18 +1,10 @@
 steps:
 - name: 'python:3.7-slim'
-  id: INSTALL
-  entrypoint: /bin/sh
-  args:
-  - '-c'
-  - 'pip install -r train/requirements.txt'
-- name: 'python:3.7-slim'
   id: RUN-UNIT-TESTS-AND-COVERAGE
   entrypoint: /bin/sh
   args:
   - '-c'
-  - 'coverage run --source=train -m nose2 -v -s test && coverage report train/train.py'
-  waitFor:
-  - INSTALL
+  - 'pip install -r train/requirements.txt && coverage run --source=train -m nose2 -v -s test && coverage report train/train.py'
 - name: 'gcr.io/cloud-builders/docker'
   id: CACHE-DOCKER-IMAGE
   entrypoint: 'bash'
