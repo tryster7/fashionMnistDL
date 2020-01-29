@@ -1,15 +1,10 @@
 steps:
-- name: python:3.7
+- name: 'python:3.7-slim'
   id: INSTALL
-  entrypoint: python3
+  entrypoint: /bin/sh
   args:
-  - '-m'
-  - 'pip'
-  - 'install'
-  - '-t'
-  - '.'
-  - '-r'
-  - 'train/requirements.txt'
+  - '-c'
+  - 'pip install -r train/requirements.txt'
 - name: 'python:3.7-slim'
   id: RUN-UNIT-TESTS-AND-COVERAGE
   entrypoint: /bin/sh
