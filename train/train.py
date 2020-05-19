@@ -8,6 +8,7 @@ import json
 import pandas as pd
 import os
 import argparse
+import csv
 
 from sklearn.metrics import confusion_matrix
 
@@ -44,7 +45,7 @@ def parse_arguments():
     return args
 
 
-def train(bucket_name, epochs=10, batch_size=128):
+def train(bucket_name, epochs=2, batch_size=512):
 
     exec = create_metadata_execution()
     testX, testy, trainX, trainy = load_and_normalize_data()
@@ -58,16 +59,12 @@ def train(bucket_name, epochs=10, batch_size=128):
 
     pred = np.argmax(predictions, axis=1)
 
-    model = save_model_metadata(exec, batch_size, epochs)
-
     test_loss, test_acc = cnn.evaluate(testX, testy, verbose=2)
 
     print("\n Test Accuracy is {} ".format(test_acc))
     print("\n Test Loss is {} ".format(test_loss))
 
-    save_metric_metadata(exec, model, test_acc, test_loss)
-
-    save_tfmodel_in_gcs(bucket_name, cnn)
+    save_tfmodel_in_gcs(exec, bucket_name, cnn, batch_size, epochs, test_loss, test_acc)
 
     df = pd.DataFrame({'target': testy, 'predicted': pred}, columns=['target', 'predicted'])
     df = df.applymap(np.int64)
@@ -75,9 +72,13 @@ def train(bucket_name, epochs=10, batch_size=128):
     create_kf_visualization(bucket_name, df, test_acc)
 
 
-def save_tfmodel_in_gcs(bucket_name, model):
+def save_tfmodel_in_gcs(exec, bucket_name, model, batch_size, epochs, test_loss, test_acc):
+
     export_path = bucket_name + '/export/model/1'
     tf.saved_model.save(model, export_dir=export_path)
+    model_metadata = save_model_metadata(exec, batch_size, epochs, export_path)
+    save_metric_metadata(exec, model_metadata, test_acc, test_loss, bucket_name)
+
 
 
 def create_tfmodel(optimizer, loss, metrics):
@@ -136,14 +137,22 @@ def create_kf_visualization(bucket_name, df, test_acc):
         json.dump(metadata, f)
 
 
-def save_metric_metadata(exec, model, test_acc, test_loss):
+def save_metric_metadata(exec, model, test_acc, test_loss, bucket_name):
+
+    metric_file = bucket_name + '/metadata/metrics.csv'
+
+    with  file_io.FileIO(metric_file, 'w') as f: 
+        metric_writer = csv.writer(f)
+        metric_writer.writerow(['accuracy', test_acc])
+        metric_writer.writerow(['loss',  test_loss])
+
     # Save evaluation
     metrics = exec.log_output(
         metadata.Metrics(
             name="MNIST-evaluation",
             description="validating the MNIST model to recognize images",
             owner="demo@kubeflow.org",
-            uri="gs://a-kb-poc-262417/mnist/metadata/mnist-metric.csv",
+            uri = metric_file,
             model_id=str(model.id),
             metrics_type=metadata.Metrics.VALIDATION,
             values={"accuracy": str(test_acc),
@@ -152,7 +161,18 @@ def save_metric_metadata(exec, model, test_acc, test_loss):
     print("Metrics id is %s" % metrics.id)
 
 
-def save_model_metadata(exec, batch_size, epochs):
+def save_model_metadata(exec, batch_size, epochs, export_path):
+
+    training_file = 'gs://dlaas-model/metadata/model.csv'
+
+    with  file_io.FileIO(training_file, 'w') as f:
+        metric_writer = csv.writer(f)
+        metric_writer.writerow(['model_framework', 'tensorflow', 'v2.0'])
+        metric_writer.writerow(['learning_rate', 0.5])
+        metric_writer.writerow(['epoch', epochs ])
+        metric_writer.writerow(['batch_size', batch_size ])
+        metric_writer.writerow(['layers',"28, 28, 1" ])
+
     # Save model;
     model_version = "model_version_" + str(uuid4())
     model = exec.log_output(
@@ -160,7 +180,7 @@ def save_model_metadata(exec, batch_size, epochs):
             name="MNIST",
             description="model to recognize images",
             owner="demo@kubeflow.org",
-            uri="gs://a-kb-poc-262417/mnist/export/model",
+            uri=export_path,
             model_type="CNN",
             training_framework={
                 "name": "tensorflow",
@@ -215,6 +235,7 @@ def load_and_normalize_data():
 
 
 if __name__ == '__main__':
+
     print("The arguments are ", str(sys.argv))
     if len(sys.argv) < 1:
         print("Usage: train bucket-name epochs batch-size")

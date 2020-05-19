@@ -8,3 +8,4 @@ gcsfs
 kubeflow-metadata
 nose2
 coverage
+kubeflow-metadata
